@@ -12,6 +12,53 @@ st.markdown("""
 .stApp { background: linear-gradient(180deg, #f4fbf3 0%, #ffffff 55%); }
 h1, h2, h3 { color: #17633b; }
 div[data-testid="stMetric"] { background: #eef8ed; padding: 14px; border-radius: 12px; }
+/* EcoGuard Modern Green Theme */
+.stApp {
+    background: linear-gradient(135deg, #f0fdf4, #ecfeff, #ffffff);
+}
+
+h1, h2, h3 {
+    color: #166534 !important;
+    font-weight: 800 !important;
+}
+
+.stButton > button {
+    background: linear-gradient(135deg, #16a34a, #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(135deg, #15803d, #047857);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(22, 163, 74, 0.25);
+}
+
+[data-testid="stMetric"] {
+    background: white;
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid #dcfce7;
+    box-shadow: 0 4px 12px rgba(22, 101, 52, 0.08);
+}
+
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #dcfce7, #f0fdf4);
+}
+
+.stTextInput input,
+.stTextArea textarea {
+    border-radius: 10px;
+}
+
+hr {
+    border-color: #bbf7d0;
+}
 </style>
 """, unsafe_allow_html=True)
 

@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from datetime import datetime
 
-st.set_page_config(page_title="EcoGuard", page_icon="st.image("ecoguard_logo_png.png", width=180)", layout="wide")
+st.set_page_config(page_title="EcoGuard", page_icon="st.image("🌍", width=180)", layout="wide")
 st.image("ecoguard_logo_png.png", width=180)
 
 # ---------------------------

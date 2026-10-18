@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 from datetime import datetime
+from streamlit_mic_recorder 
+import speech_to_text
 
 st.set_page_config(page_title="EcoGuard", page_icon="🌍", layout="wide")
 
@@ -202,6 +204,14 @@ elif page == "💬 Eco Chatbot":
     st.write("Ask Gemini AI about climate change, biodiversity, recycling, water, renewable energy, or everyday eco-friendly actions.")
     st.info("Please don't enter passwords, API keys, your home address, or other private information.")
     prompt = st.text_area("Ask EcoGuide AI", placeholder="Example: Explain climate change in simple words.", max_chars=1500)
+    voice_text = speech_to_text(
+    language="en",
+    start_prompt="🎤 Speak your question",
+    stop_prompt="⏹️ Stop recording",
+    key="ecoguard_voice"
+)
+    if voice_text:
+    st.info(f"You said: {voice_text}")
     if st.button("Ask EcoGuide AI", type="primary"):
         if not prompt.strip():
             st.warning("Type a question first.")

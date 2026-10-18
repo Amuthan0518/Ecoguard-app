@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 from datetime import datetime
-from streamlit_mic_recorder import speech_to_text 
 
 st.set_page_config(page_title="EcoGuard", page_icon="🌍", layout="wide")
 
@@ -13,53 +12,6 @@ st.markdown("""
 .stApp { background: linear-gradient(180deg, #f4fbf3 0%, #ffffff 55%); }
 h1, h2, h3 { color: #17633b; }
 div[data-testid="stMetric"] { background: #eef8ed; padding: 14px; border-radius: 12px; }
-/* EcoGuard Modern Green Theme */
-.stApp {
-    background: linear-gradient(135deg, #f0fdf4, #ecfeff, #ffffff);
-}
-
-h1, h2, h3 {
-    color: #166534 !important;
-    font-weight: 800 !important;
-}
-
-.stButton > button {
-    background: linear-gradient(135deg, #16a34a, #059669);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 0.6rem 1.2rem;
-    font-weight: 700;
-    transition: all 0.3s ease;
-}
-
-.stButton > button:hover {
-    background: linear-gradient(135deg, #15803d, #047857);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(22, 163, 74, 0.25);
-}
-
-[data-testid="stMetric"] {
-    background: white;
-    padding: 18px;
-    border-radius: 16px;
-    border: 1px solid #dcfce7;
-    box-shadow: 0 4px 12px rgba(22, 101, 52, 0.08);
-}
-
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #dcfce7, #f0fdf4);
-}
-
-.stTextInput input,
-.stTextArea textarea {
-    border-radius: 10px;
-}
-
-hr {
-    border-color: #bbf7d0;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -201,43 +153,20 @@ elif page == "🌳 Tree Tracker":
 elif page == "💬 Eco Chatbot":
     st.subheader("EcoGuide AI 🌿")
     st.write("Ask Gemini AI about climate change, biodiversity, recycling, water, renewable energy, or everyday eco-friendly actions.")
-
-   prompt = st.text_area(
-    "Ask EcoGuide AI",
-    placeholder="Example: Explain climate change in simple words.",
-    max_chars=1500
-)
-
-voice_text = speech_to_text(
-    language="en",
-    start_prompt="🎤 Speak your question",
-    stop_prompt="⏹️ Stop recording",
-    key="ecoguard_voice"
-)
-
-if voice_text:
-    st.info(f"You said: {voice_text}")
-
-if st.button("Ask EcoGuide AI", type="primary"):
-    if not prompt.strip():
-        st.warning("Type a question first.")
-            if not prompt.strip():
-        st.warning("Type a question first.")
-    else:
-        try:
-            api_key = st.secrets.get("GEMINI_API_KEY", "")
-            if not api_key:
-                st.error(
-                    "Gemini API key is missing. Add GEMINI_API_KEY "
-                    "in Streamlit Settings → Secrets."
-                )
-            else:
-                with st.spinner("EcoGuide AI is thinking..."):
-                    # Keep your existing Gemini request code here.
-                    pass
-        except Exception as e:
-            st.error(f"Something went wrong: {e}")                     response = requests.post(
-                            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+    st.info("Please don't enter passwords, API keys, your home address, or other private information.")
+    prompt = st.text_area("Ask EcoGuide AI", placeholder="Example: Explain climate change in simple words.", max_chars=1500)
+    if st.button("Ask EcoGuide AI", type="primary"):
+        if not prompt.strip():
+            st.warning("Type a question first.")
+        else:
+            try:
+                api_key = st.secrets.get("GEMINI_API_KEY", "")
+                if not api_key:
+                    st.error("Gemini API key is missing. Add GEMINI_API_KEY in your Streamlit app's Settings → Secrets, then save.")
+                else:
+                    with st.spinner("EcoGuide AI is thinking..."):
+                        response = requests.post(
+                            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
                             params={"key": api_key},
                             headers={"Content-Type": "application/json"},
                             json={

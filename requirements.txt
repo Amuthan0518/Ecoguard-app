@@ -2,3 +2,4 @@ streamlit
 requests
 streamlit-geolocation
 google-genai
+streamlit-mic-recorder

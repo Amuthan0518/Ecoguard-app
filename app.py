@@ -221,6 +221,8 @@ if voice_text:
 if st.button("Ask EcoGuide AI", type="primary"):
     if not prompt.strip():
         st.warning("Type a question first.")
+            if not prompt.strip():
+        st.warning("Type a question first.")
     else:
         try:
             api_key = st.secrets.get("GEMINI_API_KEY", "")

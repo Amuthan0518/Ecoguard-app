@@ -1,8 +1,7 @@
 import streamlit as st
 import requests
 from datetime import datetime
-from streamlit_mic_recorder 
-import speech_to_text
+from streamlit_mic_recorder import speech_to_text 
 
 st.set_page_config(page_title="EcoGuard", page_icon="🌍", layout="wide")
 

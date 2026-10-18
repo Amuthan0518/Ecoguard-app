@@ -3,6 +3,7 @@ import requests
 from datetime import datetime
 
 st.set_page_config(page_title="EcoGuard", page_icon="🌍", layout="wide")
+st.image("ecoguard_logo.png", width=180)
 
 # ---------------------------
 # EcoGuard: beginner prototype

@@ -201,8 +201,13 @@ elif page == "🌳 Tree Tracker":
 elif page == "💬 Eco Chatbot":
     st.subheader("EcoGuide AI 🌿")
     st.write("Ask Gemini AI about climate change, biodiversity, recycling, water, renewable energy, or everyday eco-friendly actions.")
-    st.info("Please don't enter passwords, API keys, your home address, or other private information.")
-    prompt = st.text_area("Ask EcoGuide AI", placeholder="Example: Explain climate change in simple words.", max_chars=1500)
+
+   prompt = st.text_area(
+    "Ask EcoGuide AI",
+    placeholder="Example: Explain climate change in simple words.",
+    max_chars=1500
+)
+
 voice_text = speech_to_text(
     language="en",
     start_prompt="🎤 Speak your question",
@@ -216,14 +221,20 @@ if voice_text:
 if st.button("Ask EcoGuide AI", type="primary"):
     if not prompt.strip():
         st.warning("Type a question first.")
-        else:
-            try:
-                api_key = st.secrets.get("GEMINI_API_KEY", "")
-                if not api_key:
-                    st.error("Gemini API key is missing. Add GEMINI_API_KEY in your Streamlit app's Settings → Secrets, then save.")
-                else:
-                    with st.spinner("EcoGuide AI is thinking..."):
-                        response = requests.post(
+    else:
+        try:
+            api_key = st.secrets.get("GEMINI_API_KEY", "")
+            if not api_key:
+                st.error(
+                    "Gemini API key is missing. Add GEMINI_API_KEY "
+                    "in Streamlit Settings → Secrets."
+                )
+            else:
+                with st.spinner("EcoGuide AI is thinking..."):
+                    # Keep your existing Gemini request code here.
+                    pass
+        except Exception as e:
+            st.error(f"Something went wrong: {e}")                     response = requests.post(
                             "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
                             params={"key": api_key},
                             headers={"Content-Type": "application/json"},

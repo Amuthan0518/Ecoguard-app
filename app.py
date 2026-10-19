@@ -167,7 +167,7 @@ elif page == "💬 Eco Chatbot":
                 else:
                     with st.spinner("EcoGuide AI is thinking..."):
                         response = requests.post(
-                            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+                            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
                             params={"key": api_key},
                             headers={"Content-Type": "application/json"},
                             json={

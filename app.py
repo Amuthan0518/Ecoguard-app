@@ -34,6 +34,126 @@ if "quiz_awarded" not in st.session_state:
     st.session_state.quiz_awarded = False
 if "quiz_round" not in st.session_state:
     st.session_state.quiz_round = 0
+if "active_username" not in st.session_state:
+    st.session_state.active_username = ""
+if "supabase_status" not in st.session_state:
+    st.session_state.supabase_status = ""
+
+def supabase_configured():
+    """Use a server-side Supabase secret key stored only in Streamlit Secrets."""
+    return bool(st.secrets.get("SUPABASE_URL", "").strip() and
+                st.secrets.get("SUPABASE_SECRET_KEY", "").strip())
+
+def supabase_headers():
+    secret_key = st.secrets.get("SUPABASE_SECRET_KEY", "").strip()
+    return {
+        "apikey": secret_key,
+        "Authorization": f"Bearer {secret_key}",
+        "Content-Type": "application/json",
+    }
+
+def load_progress(username):
+    """Load one username's saved progress from Supabase."""
+    if not supabase_configured():
+        st.session_state.supabase_status = (
+            "Supabase is not configured for saving yet. Add SUPABASE_URL and "
+            "SUPABASE_SECRET_KEY in Streamlit Secrets."
+        )
+        return False
+    base_url = st.secrets["SUPABASE_URL"].strip().rstrip("/")
+    try:
+        response = requests.get(
+            f"{base_url}/rest/v1/ecoguard_progress",
+            headers=supabase_headers(),
+            params={"select": "user_id,eco_points,quiz_score,trees_planted,completed_challenges",
+                    "user_id": f"eq.{username}", "limit": "1"},
+            timeout=15,
+        )
+        response.raise_for_status()
+        rows = response.json()
+        row = rows[0] if rows else None
+        st.session_state.points = int(row.get("eco_points", 0)) if row else 0
+        st.session_state.quiz_score = int(row.get("quiz_score", 0)) if row else 0
+        st.session_state.trees = int(row.get("trees_planted", 0)) if row else 0
+        completed = row.get("completed_challenges", []) if row else []
+        st.session_state.completed_challenges = set(completed if isinstance(completed, list) else [])
+        st.session_state.quiz_awarded = bool(st.session_state.quiz_score)
+        st.session_state.quiz_answers = {}
+        st.session_state.quiz_submitted = False
+        st.session_state.supabase_status = "Progress loaded from Supabase."
+        return True
+    except (requests.RequestException, ValueError, TypeError, KeyError):
+        st.session_state.supabase_status = (
+            "Could not load saved progress. Check the Supabase URL, server-side "
+            "secret key, table name, and database permissions."
+        )
+        return False
+
+def save_progress():
+    """Save the current user's progress to Supabase."""
+    username = st.session_state.get("active_username", "")
+    if not username or not supabase_configured():
+        return
+    base_url = st.secrets["SUPABASE_URL"].strip().rstrip("/")
+    payload = {
+        "user_id": username,
+        "eco_points": min(max(int(st.session_state.points), 0), 100),
+        "quiz_score": int(st.session_state.get("quiz_score", 0)),
+        "trees_planted": int(st.session_state.trees),
+        "completed_challenges": sorted(st.session_state.completed_challenges),
+        "updated_at": datetime.now().astimezone().isoformat(),
+    }
+    try:
+        response = requests.post(
+            f"{base_url}/rest/v1/ecoguard_progress",
+            headers={**supabase_headers(), "Prefer": "resolution=merge-duplicates,return=minimal"},
+            params={"on_conflict": "user_id"},
+            json=payload,
+            timeout=15,
+        )
+        response.raise_for_status()
+        st.session_state.supabase_status = "Progress saved to Supabase."
+    except requests.RequestException:
+        st.session_state.supabase_status = (
+            "Progress could not be saved. Check the Supabase secret key and table permissions."
+        )
+
+# Username-based profiles are convenient, but a username alone is not authentication:
+# another person could enter the same username. Do not store sensitive information here.
+if not st.session_state.active_username:
+    st.subheader("👤 Open your EcoGuard profile")
+    st.write("Enter your username to load your saved EcoPoints, quiz score, challenges, and tree records.")
+    with st.form("profile_login"):
+        entered_username = st.text_input(
+            "Username", max_chars=32, placeholder="Example: Amuthan05"
+        )
+        open_profile = st.form_submit_button("Open my profile", type="primary")
+    st.info("Username-only profiles are not private accounts. Someone else could enter the same username. Use a nickname, not personal or sensitive information.")
+    if open_profile:
+        clean_username = entered_username.strip()
+        if len(clean_username) < 3 or not all(ch.isalnum() or ch in "_-" for ch in clean_username):
+            st.error("Choose a username with 3–32 letters, numbers, underscores, or hyphens.")
+        else:
+            st.session_state.active_username = clean_username
+            st.session_state.points = 0
+            st.session_state.quiz_score = 0
+            st.session_state.trees = 0
+            st.session_state.completed_challenges = set()
+            st.session_state.quiz_awarded = False
+            st.session_state.quiz_answers = {}
+            st.session_state.quiz_submitted = False
+            load_progress(clean_username)
+            st.rerun()
+    if not supabase_configured():
+        st.warning("Saving between visits is not ready yet. In Streamlit Secrets, add SUPABASE_URL and SUPABASE_SECRET_KEY. Keep the secret key private and never put it in GitHub.")
+    st.stop()
+
+st.sidebar.success(f"Profile: {st.session_state.active_username}")
+if st.sidebar.button("Log out / switch username"):
+    st.session_state.active_username = ""
+    st.rerun()
+if st.session_state.get("supabase_status"):
+    st.sidebar.caption(st.session_state.supabase_status)
 
 challenges = {
     "Switch off unused lights": ("Save electricity when a room is empty.", 10),
@@ -73,7 +193,10 @@ if page == "🏠 Dashboard":
     - **Weather & Climate:** look up current weather for a city.
     - **Air Quality (AQI):** check live air quality and pollutant readings where available.
     """)
-    st.warning("Your current progress is stored only for this app session. It may reset when the session ends.")
+    if not supabase_configured():
+        st.warning("Supabase saving is not configured, so progress may reset when this session ends.")
+    else:
+        st.success(f"Signed in as **{st.session_state.active_username}**. Progress is saved to your Supabase profile.")
 
 elif page == "🌱 Eco Challenges":
     st.subheader("Today's eco challenges")
@@ -445,3 +568,6 @@ elif page == "🌫️ Air Quality index(AQI)":
 
 st.divider()
 st.caption("EcoGuard prototype • Educational use • Verify local environmental and emergency guidance with official sources.")
+
+# Persist this profile after page actions and reruns.
+save_progress()

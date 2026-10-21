@@ -47,7 +47,7 @@ challenges = {
 pages = [
     "🏠 Dashboard", "🌱 Eco Challenges", "🌡️ Carbon Calculator",
     "🧠 Climate Quiz", "🌳 Tree Tracker", "💬 Eco Chatbot",
-    "📣 Pollution Report", "🌦️ Weather & Climate", "🌫️ Air Quality index (AQI)"
+    "📣 Pollution Report", "🌦️ Weather & Climate", "🌫️ Air Quality index(AQI)"
 ]
 page = st.sidebar.radio("Navigate", pages)
 eco_score = min(max(int(st.session_state.points), 0), 100)
@@ -71,7 +71,7 @@ if page == "🏠 Dashboard":
     - **Eco Chatbot:** get basic environmental tips.
     - **Pollution Report:** create a local demo report.
     - **Weather & Climate:** look up current weather for a city.
-    - **Air Quality index(AQI):** check live air quality and pollutant readings where available.
+    - **Air Quality (AQI):** check live air quality and pollutant readings where available.
     """)
     st.warning("Your current progress is stored only for this app session. It may reset when the session ends.")
 

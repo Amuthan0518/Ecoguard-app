@@ -47,7 +47,7 @@ challenges = {
 pages = [
     "🏠 Dashboard", "🌱 Eco Challenges", "🌡️ Carbon Calculator",
     "🧠 Climate Quiz", "🌳 Tree Tracker", "💬 Eco Chatbot",
-    "📣 Pollution Report", "🌦️ Weather & Climate", "🌫️ Air Quality index (AQI)"
+    "📣 Pollution Report", "🌦️ Weather & Climate", "🌫️ Air Quality index(AQI)"
 ]
 page = st.sidebar.radio("Navigate", pages)
 eco_score = min(max(int(st.session_state.points), 0), 100)
@@ -372,7 +372,7 @@ elif page == "🌦️ Weather & Climate":
     """)
     st.caption("Weather service: Open-Meteo (internet connection required).")
 
-elif page == "🌫️ Air Quality (AQI)":
+elif page == "🌫️ Air Quality index(AQI)":
     st.subheader("Current air quality")
     st.write("Look up the latest available air-quality model data for a city. Readings and pollutant coverage vary by location and provider availability.")
     aqi_city = st.text_input("City for air quality", value="Chennai", key="aqi_city")

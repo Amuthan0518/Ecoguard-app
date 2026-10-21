@@ -1,9 +1,9 @@
 import streamlit as st
 import requests
 from datetime import datetime
+import random
 
-st.set_page_config(page_title="EcoGuard", page_icon="st.image('🌍', width=180)", layout="wide")
-st.image("ecoguard_logo_png.png", width=180)
+st.set_page_config(page_title="EcoGuard", page_icon="🌍", layout="wide")
 
 # ---------------------------
 # EcoGuard: beginner prototype
@@ -45,18 +45,20 @@ challenges = {
 pages = [
     "🏠 Dashboard", "🌱 Eco Challenges", "🌡️ Carbon Calculator",
     "🧠 Climate Quiz", "🌳 Tree Tracker", "💬 Eco Chatbot",
-    "📣 Pollution Report", "🌦️ Weather & Climate"
+    "📣 Pollution Report", "🌦️ Weather & Climate", "🌫️ Air Quality (AQI)"
 ]
 page = st.sidebar.radio("Navigate", pages)
-st.sidebar.metric("Your EcoPoints", st.session_state.points)
-st.sidebar.caption("Prototype points are for learning, not a verified environmental measurement.")
+eco_score = min(max(int(st.session_state.points), 0), 100)
+st.sidebar.metric("Your EcoPoints", f"{eco_score}/100")
+st.sidebar.caption("Displayed EcoPoints are capped at 100. Points are for learning, not a verified environmental measurement.")
 
 if page == "🏠 Dashboard":
     st.subheader("Your environmental dashboard")
     c1, c2, c3 = st.columns(3)
-    c1.metric("EcoPoints", st.session_state.points)
+    c1.metric("EcoPoints", f"{eco_score}/100")
     c2.metric("Challenges done", len(st.session_state.completed_challenges))
     c3.metric("Trees recorded", st.session_state.trees)
+    st.progress(eco_score / 100, text=f"EcoPoints: {eco_score} / 100")
     st.info("Start with one small action. Repeating good habits can help reduce environmental impact.")
     st.subheader("Explore EcoGuard")
     st.markdown("""
@@ -67,6 +69,7 @@ if page == "🏠 Dashboard":
     - **Eco Chatbot:** get basic environmental tips.
     - **Pollution Report:** create a local demo report.
     - **Weather & Climate:** look up current weather for a city.
+    - **Air Quality (AQI):** check live air quality and pollutant readings where available.
     """)
     st.warning("Your current progress is stored only for this app session. It may reset when the session ends.")
 
@@ -106,7 +109,7 @@ elif page == "🌡️ Carbon Calculator":
 
 elif page == "🧠 Climate Quiz":
     st.subheader("Climate knowledge quiz")
-    questions = [
+    question_pool = [
         ("Which gas is a major contributor to human-caused global warming?", ["Oxygen", "Carbon dioxide", "Helium", "Neon"], 1,
          "Carbon dioxide traps heat in the atmosphere and is released by burning fossil fuels and other activities."),
         ("Which source produces electricity without directly burning fossil fuels during operation?", ["Coal power", "Diesel generator", "Solar panels", "Petrol engine"], 2,
@@ -116,8 +119,57 @@ elif page == "🧠 Climate Quiz":
         ("What does biodiversity mean?", ["Only the number of trees", "The variety of living things", "Daily temperature", "The amount of traffic"], 1,
          "Biodiversity means the variety of life, including plants, animals and microorganisms."),
         ("Which action can help save household electricity?", ["Leave every light on", "Keep unused devices running", "Switch off unused lights", "Open the fridge for a long time"], 2,
-         "Turning off unnecessary lights reduces electricity use.")
+         "Turning off unnecessary lights reduces electricity use."),
+        ("Which gas is released when fossil fuels are burned?", ["Carbon dioxide", "Oxygen", "Helium", "Neon"], 0,
+         "Burning coal, oil and gas releases carbon dioxide, a heat-trapping greenhouse gas."),
+        ("Which practice helps conserve water at home?", ["Leave taps running", "Fix leaking taps", "Wash one item at a time", "Water pavement"], 1,
+         "Repairing leaks prevents clean water from being wasted."),
+        ("What is composting?", ["Burning household waste", "Turning organic scraps into soil material", "Putting all waste in a river", "Making plastic bottles"], 1,
+         "Composting lets food and garden scraps break down into useful organic material."),
+        ("Which transport choice usually creates fewer emissions per passenger?", ["A bus", "A solo car trip", "A short flight", "An idling car"], 0,
+         "Shared transport can reduce emissions per passenger compared with individual car trips."),
+        ("What does renewable energy come from?", ["Sources replenished naturally", "Only coal", "Plastic waste alone", "A limited fuel deposit"], 0,
+         "Sunlight, wind and flowing water are examples of renewable energy sources."),
+        ("Why are wetlands valuable?", ["They support wildlife and store water", "They increase plastic waste", "They prevent all rain", "They contain no plants"], 0,
+         "Wetlands provide habitat, help filter water and can reduce flooding."),
+        ("What is one good way to reduce food waste?", ["Plan meals and use leftovers", "Buy more than needed", "Throw away unopened food", "Leave food outdoors"], 0,
+         "Planning meals and using leftovers can prevent edible food from being discarded."),
+        ("Which item is generally reusable?", ["A refillable cup", "A disposable straw", "A single-use wrapper", "A one-time plastic bag"], 0,
+         "A refillable cup can be used repeatedly instead of disposable cups."),
+        ("What does the ozone layer help protect life from?", ["Some harmful ultraviolet radiation", "All earthquakes", "Ocean tides", "Wind"], 0,
+         "Ozone high in the atmosphere absorbs much of the Sun's harmful ultraviolet radiation."),
+        ("Which is an example of adapting to climate impacts?", ["Planning for heatwaves", "Using more disposable items", "Ignoring flood risk", "Wasting electricity"], 0,
+         "Heat action plans help communities prepare for and reduce risks from extreme heat."),
+        ("What is biodiversity?", ["The variety of life", "The daily weather", "One type of crop", "The number of cars"], 0,
+         "Biodiversity includes the variety of genes, species and ecosystems."),
+        ("How can shade trees help a neighborhood?", ["Cool shaded areas", "Increase traffic", "Make drinking water", "Remove all pollution"], 0,
+         "Tree shade can cool nearby surfaces and make outdoor spaces more comfortable."),
+        ("Which action is safest around unknown pollution?", ["Keep a safe distance and report it", "Touch or smell it", "Burn it", "Move it by hand"], 0,
+         "Avoid contact with unknown substances and tell the appropriate local authority or a trusted adult."),
+        ("What does recycling usually require?", ["Following local sorting rules", "Mixing hazardous waste with food", "Putting everything in one bin", "Rinsing waste into drains"], 0,
+         "Accepted materials and sorting rules vary, so follow your local recycling guidance."),
+        ("Which surface usually absorbs more heat in direct sunlight?", ["Dark asphalt", "A shaded pond", "Fresh snow", "A light-colored roof"], 0,
+         "Dark paved surfaces absorb sunlight and can become much hotter than lighter surfaces."),
+        ("What is a local climate?", ["Long-term weather patterns in a place", "Today's temperature only", "One rain shower", "This week's wind"], 0,
+         "Climate describes patterns and averages over many years."),
+        ("Which household habit can reduce standby electricity use?", ["Turn off devices when not needed", "Leave every charger plugged in", "Keep screens on overnight", "Open the refrigerator often"], 0,
+         "Switching off devices when they are not needed can reduce some standby electricity use."),
+        ("Why should native plants be considered in gardens?", ["They can support local wildlife", "They always need more water", "They remove the need for all care", "They are harmful everywhere"], 0,
+         "Plants native to an area can provide food and habitat for local wildlife, depending on the species and site."),
+        ("Which source is a direct observation of climate?", ["Many years of temperature records", "One unusually cold morning", "A single cloudy afternoon", "One windy day"], 0,
+         "Long-term records help scientists identify climate patterns beyond day-to-day variation.")
     ]
+    if "quiz_questions" not in st.session_state:
+        st.session_state.quiz_questions = random.sample(question_pool, 10)
+        st.session_state.quiz_answers = {}
+        st.session_state.quiz_submitted = False
+    if st.button("🔄 Reset quiz and shuffle questions", key="reset_quiz"):
+        st.session_state.quiz_questions = random.sample(question_pool, 10)
+        st.session_state.quiz_answers = {}
+        st.session_state.quiz_submitted = False
+        st.rerun()
+    questions = st.session_state.quiz_questions
+    st.caption(f"This round draws 10 questions at random from a pool of {len(question_pool)}. Quiz points can be earned once per app session.")
     with st.form("climate_quiz"):
         answers = {}
         for i, (q, opts, correct, explanation) in enumerate(questions):
@@ -127,6 +179,7 @@ elif page == "🧠 Climate Quiz":
         score = sum(1 for i, (q, opts, correct, explanation) in enumerate(questions) if answers[i] == opts[correct])
         st.session_state.quiz_answers = answers
         st.session_state.quiz_score = score
+        st.session_state.quiz_submitted = True
         if not st.session_state.quiz_awarded:
             earned = score * 5
             st.session_state.points += earned
@@ -134,8 +187,10 @@ elif page == "🧠 Climate Quiz":
             st.success(f"You scored {score}/{len(questions)} and earned {earned} points!")
         else:
             st.info(f"You scored {score}/{len(questions)}. Quiz points have already been awarded in this session.")
+    if st.session_state.get("quiz_submitted"):
         for i, (q, opts, correct, explanation) in enumerate(questions):
-            st.markdown(f"**Q{i+1}:** {'✅' if answers[i] == opts[correct] else '❌'} {explanation}")
+            picked = st.session_state.quiz_answers.get(i)
+            st.markdown(f"**Q{i+1}:** {'✅' if picked == opts[correct] else '❌'} {explanation}")
     if st.session_state.quiz_awarded:
         st.caption("To avoid repeatedly collecting points, this prototype awards quiz points once per session.")
 
@@ -152,55 +207,68 @@ elif page == "🌳 Tree Tracker":
     st.caption("This prototype counts recorded activities, not independently verified surviving trees. Tree planting should use suitable native species and appropriate local guidance.")
 
 elif page == "💬 Eco Chatbot":
-    st.subheader("EcoGuide AI 🌿")
-    st.write("Ask Gemini AI about climate change, biodiversity, recycling, water, renewable energy, or everyday eco-friendly actions.")
-    st.info("Please don't enter passwords, API keys, your home address, or other private information.")
-    prompt = st.text_area("Ask EcoGuide AI", placeholder="Example: Explain climate change in simple words.", max_chars=1500)
-    if st.button("Ask EcoGuide AI", type="primary"):
-        if not prompt.strip():
-            st.warning("Type a question first.")
+    st.subheader("EcoGuide — AI environmental assistant")
+    st.write("Ask questions about climate, trees, recycling, water, energy, wildlife, or pollution.")
+    st.caption("AI answers can be imperfect. Do not enter passwords, private details, or sensitive information.")
+
+    if "eco_chat_history" not in st.session_state:
+        st.session_state.eco_chat_history = []
+
+    for item in st.session_state.eco_chat_history:
+        with st.chat_message(item["role"]):
+            st.markdown(item["content"])
+
+    prompt = st.chat_input("Ask EcoGuide an environmental question...")
+    if prompt:
+        st.session_state.eco_chat_history.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        api_key = st.secrets.get("GEMINI_API_KEY", "")
+        if not api_key or api_key == "PASTE_YOUR_NEW_API_KEY_HERE":
+            answer = "Gemini AI is not configured yet. Add GEMINI_API_KEY to your Streamlit app's Secrets, then restart or rerun the app. Never put the key in GitHub code."
+            with st.chat_message("assistant"):
+                st.warning(answer)
         else:
-            try:
-                api_key = st.secrets.get("GEMINI_API_KEY", "")
-                if not api_key:
-                    st.error("Gemini API key is missing. Add GEMINI_API_KEY in your Streamlit app's Settings → Secrets, then save.")
-                else:
-                    with st.spinner("EcoGuide AI is thinking..."):
+            with st.chat_message("assistant"):
+                with st.spinner("EcoGuide is thinking..."):
+                    try:
+                        history = []
+                        for item in st.session_state.eco_chat_history[-10:]:
+                            role = "user" if item["role"] == "user" else "model"
+                            history.append({"role": role, "parts": [{"text": item["content"]}]})
+                        # Use Gemini's REST API so no extra Python package is needed.
                         response = requests.post(
-                            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
-                            params={"key": api_key},
-                            headers={"Content-Type": "application/json"},
+                            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+                            headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
                             json={
-                                "system_instruction": {
-                                    "parts": [{"text": "You are EcoGuide, a friendly environmental education assistant for a school project. Give accurate, age-appropriate, practical answers in clear simple English. Focus on climate, nature, pollution, recycling, water, energy, and sustainability. Do not claim to contact authorities or perform actions. If unsure, say so. Keep answers concise."}]
-                                },
-                                "contents": [{"role": "user", "parts": [{"text": prompt.strip()}]}],
-                                "generationConfig": {"temperature": 0.6, "maxOutputTokens": 600}
+                                "systemInstruction": {"parts": [{"text": "You are EcoGuide, a friendly environmental education assistant for students. Give clear, accurate, age-appropriate answers about the environment. Use simple language, practical safe actions, and concise explanations. Do not ask for personal information. If unsure, say so."}]},
+                                "contents": history,
+                                "generationConfig": {"temperature": 0.6, "maxOutputTokens": 700}
                             },
                             timeout=30
                         )
-                    if response.ok:
-                        data = response.json()
-                        candidates = data.get("candidates", [])
-                        parts = candidates[0].get("content", {}).get("parts", []) if candidates else []
-                        answer = "\n".join(part.get("text", "") for part in parts if part.get("text"))
-                        if answer.strip():
+                        if response.status_code == 200:
+                            data = response.json()
+                            answer = data["candidates"][0]["content"]["parts"][0]["text"]
                             st.markdown(answer)
+                        elif response.status_code in (400, 401, 403):
+                            answer = "Gemini could not accept the API key or request. Check that your key is valid, the Gemini API is enabled, and your free-tier quota is available. Do not share the key publicly."
+                            st.error(answer)
+                        elif response.status_code == 429:
+                            answer = "The Gemini free-tier limit may have been reached. Please wait a while and try again."
+                            st.warning(answer)
                         else:
-                            st.warning("Gemini returned no text this time. Please try asking in a different way.")
-                    elif response.status_code == 429:
-                        st.warning("The Gemini free-tier usage limit may have been reached. Wait a little and try again.")
-                    elif response.status_code in (401, 403):
-                        st.error("Gemini did not accept this API key or the project is not allowed to use the API. Check your key in Streamlit Secrets and confirm Gemini API access is enabled.")
-                    else:
-                        st.error(f"Gemini request failed (HTTP {response.status_code}). Check the API key, model availability, and Google AI Studio project settings.")
-            except requests.Timeout:
-                st.error("Gemini took too long to respond. Please try again.")
-            except requests.RequestException:
-                st.error("Could not connect to Gemini. Check the app's internet connection and try again.")
-            except Exception:
-                st.error("Something went wrong while contacting Gemini. Check Streamlit app logs for details; never share your API key.")
-    st.caption("Gemini API availability and free-tier limits can vary. EcoGuard is an educational prototype; verify important environmental or safety advice with trusted sources.")
+                            answer = f"Gemini returned an error (HTTP {response.status_code}). Please try again later."
+                            st.error(answer)
+                    except (requests.RequestException, KeyError, IndexError, TypeError, ValueError):
+                        answer = "I couldn't get an AI response just now. Check the app's internet connection and try again."
+                        st.error(answer)
+            st.session_state.eco_chat_history.append({"role": "assistant", "content": answer})
+
+    if st.button("Clear chat history"):
+        st.session_state.eco_chat_history = []
+        st.rerun()
 
 elif page == "📣 Pollution Report":
     st.subheader("Community pollution report")
@@ -256,21 +324,36 @@ elif page == "🌦️ Weather & Climate":
                     params={
                         "latitude": place["latitude"],
                         "longitude": place["longitude"],
-                        "current": "temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m",
+                    "current": "temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,precipitation,rain,showers,snowfall,weather_code",
                         "timezone": "auto"
                     },
                     timeout=10
                 )
                 weather.raise_for_status()
                 current = weather.json().get("current", {})
+                weather_codes = {
+                    0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+                    45: "Fog", 48: "Depositing rime fog", 51: "Light drizzle", 53: "Moderate drizzle",
+                    55: "Dense drizzle", 56: "Light freezing drizzle", 57: "Dense freezing drizzle",
+                    61: "Slight rain", 63: "Moderate rain", 65: "Heavy rain", 66: "Light freezing rain",
+                    67: "Heavy freezing rain", 71: "Slight snow", 73: "Moderate snow", 75: "Heavy snow",
+                    77: "Snow grains", 80: "Slight rain showers", 81: "Moderate rain showers",
+                    82: "Violent rain showers", 85: "Slight snow showers", 86: "Heavy snow showers",
+                    95: "Thunderstorm", 96: "Thunderstorm with slight hail", 99: "Thunderstorm with heavy hail"
+                }
                 st.success(f"Weather for {place['name']}, {place.get('country', '')}")
+                code = current.get("weather_code")
+                description = weather_codes.get(code, "Condition unavailable")
+                st.markdown(f"### {description}")
                 a, b, c = st.columns(3)
                 a.metric("Temperature", f"{current.get('temperature_2m', 'N/A')} °C")
                 b.metric("Feels like", f"{current.get('apparent_temperature', 'N/A')} °C")
                 c.metric("Wind speed", f"{current.get('wind_speed_10m', 'N/A')} km/h")
                 st.write(f"Relative humidity: **{current.get('relative_humidity_2m', 'N/A')}%**")
+                st.write(f"Precipitation: **{current.get('precipitation', 'N/A')} mm** · Rain: **{current.get('rain', 'N/A')} mm** · Showers: **{current.get('showers', 'N/A')} mm** · Snowfall: **{current.get('snowfall', 'N/A')} cm**")
+                st.caption(f"Condition code: {code if code is not None else 'unavailable'} · Observation time: {current.get('time', 'unavailable')} ({weather.json().get('timezone_abbreviation', 'local time')})")
                 st.caption("Weather data supplied by Open-Meteo. Conditions can change; check official local warnings for safety-critical decisions.")
-        except requests.RequestException:
+        except (requests.RequestException, KeyError, TypeError, ValueError) as exc:
             st.error("Could not connect to the weather service. Check your internet connection and try again.")
     st.subheader("Weather vs climate")
     st.markdown("""
@@ -279,6 +362,77 @@ elif page == "🌦️ Weather & Climate":
     - A single hot day does not prove climate change; scientists examine long-term observations and many kinds of evidence.
     """)
     st.caption("Weather service: Open-Meteo (internet connection required).")
+
+elif page == "🌫️ Air Quality (AQI)":
+    st.subheader("Current air quality")
+    st.write("Look up the latest available air-quality model data for a city. Readings and pollutant coverage vary by location and provider availability.")
+    aqi_city = st.text_input("City for air quality", value="Chennai", key="aqi_city")
+    if st.button("Get current AQI", type="primary", key="get_aqi"):
+        try:
+            geo = requests.get(
+                "https://geocoding-api.open-meteo.com/v1/search",
+                params={"name": aqi_city, "count": 1, "language": "en", "format": "json"},
+                timeout=10,
+            )
+            geo.raise_for_status()
+            places = geo.json().get("results", [])
+            if not places:
+                st.error("City not found. Try a larger nearby city or check the spelling.")
+            else:
+                place = places[0]
+                air_response = requests.get(
+                    "https://air-quality-api.open-meteo.com/v1/air-quality",
+                    params={
+                        "latitude": place["latitude"],
+                        "longitude": place["longitude"],
+                        "current": "us_aqi,european_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone",
+                        "timezone": "auto",
+                    },
+                    timeout=15,
+                )
+                air_response.raise_for_status()
+                air_data = air_response.json()
+                current = air_data.get("current", {})
+                us_aqi = current.get("us_aqi")
+                eu_aqi = current.get("european_aqi")
+                if us_aqi is None and eu_aqi is None:
+                    st.warning("The air-quality service returned no current AQI for this location. Try again later or choose a nearby city.")
+                else:
+                    st.success(f"Air quality for {place['name']}, {place.get('country', '')}")
+                    if us_aqi is not None:
+                        if us_aqi <= 50:
+                            category, advice = "Good", "Air quality is satisfactory for most people."
+                        elif us_aqi <= 100:
+                            category, advice = "Moderate", "Unusually sensitive people may consider reducing prolonged, heavy outdoor exertion."
+                        elif us_aqi <= 150:
+                            category, advice = "Unhealthy for sensitive groups", "Sensitive groups may wish to reduce prolonged outdoor exertion."
+                        elif us_aqi <= 200:
+                            category, advice = "Unhealthy", "Consider reducing prolonged outdoor exertion, especially if you are sensitive to air pollution."
+                        elif us_aqi <= 300:
+                            category, advice = "Very unhealthy", "Reduce prolonged outdoor exertion and follow local health guidance."
+                        else:
+                            category, advice = "Hazardous", "Avoid prolonged outdoor exertion and follow local health advisories."
+                        st.metric("U.S. AQI", f"{us_aqi} · {category}")
+                        st.info(advice)
+                    if eu_aqi is not None:
+                        st.metric("European AQI", str(eu_aqi))
+                    pollutants = [
+                        ("PM2.5", "pm2_5", "µg/m³"), ("PM10", "pm10", "µg/m³"),
+                        ("Ozone", "ozone", "µg/m³"), ("Nitrogen dioxide", "nitrogen_dioxide", "µg/m³"),
+                        ("Sulphur dioxide", "sulphur_dioxide", "µg/m³"), ("Carbon monoxide", "carbon_monoxide", "µg/m³"),
+                    ]
+                    available = [(label, current[key], unit) for label, key, unit in pollutants if current.get(key) is not None]
+                    if available:
+                        st.subheader("Pollutants")
+                        cols = st.columns(min(3, len(available)))
+                        for index, (label, value, unit) in enumerate(available):
+                            cols[index % len(cols)].metric(label, f"{value} {unit}")
+                    st.caption(f"Model data time: {current.get('time', 'unavailable')} ({air_data.get('timezone_abbreviation', 'local time')}). AQI is not a direct measurement from a local monitoring station; follow official local advisories.")
+        except requests.RequestException:
+            st.error("Could not connect to the air-quality service. Check your internet connection and try again.")
+        except (KeyError, TypeError, ValueError):
+            st.error("The air-quality service returned data in an unexpected format. Please try again later.")
+    st.caption("Air-quality data: Open-Meteo Air Quality API (internet connection required). AQI values use the provider's published index; pollutant concentrations are shown when available.")
 
 st.divider()
 st.caption("EcoGuard prototype • Educational use • Verify local environmental and emergency guidance with official sources.")

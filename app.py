@@ -45,7 +45,7 @@ challenges = {
 pages = [
     "🏠 Dashboard", "🌱 Eco Challenges", "🌡️ Carbon Calculator",
     "🧠 Climate Quiz", "🌳 Tree Tracker", "💬 Eco Chatbot",
-    "📣 Pollution Report", "🌦️ Weather & Climate", "🌫️ Air Quality (AQI)"
+    "📣 Pollution Report", "🌦️ Weather & Climate", "🌫️ Air Quality index (AQI)"
 ]
 page = st.sidebar.radio("Navigate", pages)
 eco_score = min(max(int(st.session_state.points), 0), 100)

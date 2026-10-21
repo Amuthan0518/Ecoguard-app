@@ -32,6 +32,8 @@ if "quiz_answers" not in st.session_state:
     st.session_state.quiz_answers = {}
 if "quiz_awarded" not in st.session_state:
     st.session_state.quiz_awarded = False
+if "quiz_round" not in st.session_state:
+    st.session_state.quiz_round = 0
 
 challenges = {
     "Switch off unused lights": ("Save electricity when a room is empty.", 10),
@@ -85,7 +87,12 @@ elif page == "🌱 Eco Challenges":
                 st.success("Completed")
             elif st.button("Complete", key="challenge_" + name):
                 st.session_state.completed_challenges.add(name)
-                st.session_state.points += points
+                earned = min(points, max(0, 100 - int(st.session_state.points)))
+                st.session_state.points = min(100, int(st.session_state.points) + earned)
+                if earned > 0:
+                    st.success(f"Completed! You earned {earned} EcoPoints.")
+                else:
+                    st.info("Challenge completed! Your EcoPoints are already at 100/100.")
                 st.rerun()
         st.divider()
 
@@ -164,6 +171,7 @@ elif page == "🧠 Climate Quiz":
         st.session_state.quiz_answers = {}
         st.session_state.quiz_submitted = False
     if st.button("🔄 Reset quiz and shuffle questions", key="reset_quiz"):
+        st.session_state.quiz_round += 1
         st.session_state.quiz_questions = random.sample(question_pool, 10)
         st.session_state.quiz_answers = {}
         st.session_state.quiz_submitted = False
@@ -173,7 +181,7 @@ elif page == "🧠 Climate Quiz":
     with st.form("climate_quiz"):
         answers = {}
         for i, (q, opts, correct, explanation) in enumerate(questions):
-            answers[i] = st.radio(f"{i+1}. {q}", opts, key=f"quiz_{i}")
+            answers[i] = st.radio(f"{i+1}. {q}", opts, key=f"quiz_{st.session_state.quiz_round}_{i}")
         submitted = st.form_submit_button("Check answers")
     if submitted:
         score = sum(1 for i, (q, opts, correct, explanation) in enumerate(questions) if answers[i] == opts[correct])
@@ -181,10 +189,10 @@ elif page == "🧠 Climate Quiz":
         st.session_state.quiz_score = score
         st.session_state.quiz_submitted = True
         if not st.session_state.quiz_awarded:
-            earned = score * 5
-            st.session_state.points += earned
+            earned = min(score * 5, max(0, 100 - int(st.session_state.points)))
+            st.session_state.points = min(100, int(st.session_state.points) + earned)
             st.session_state.quiz_awarded = True
-            st.success(f"You scored {score}/{len(questions)} and earned {earned} points!")
+            st.success(f"You scored {score}/{len(questions)} and earned {earned} EcoPoints!")
         else:
             st.info(f"You scored {score}/{len(questions)}. Quiz points have already been awarded in this session.")
     if st.session_state.get("quiz_submitted"):
@@ -201,8 +209,9 @@ elif page == "🌳 Tree Tracker":
     activity = st.selectbox("Activity", ["Planted a tree", "Helped care for existing trees", "Joined a tree-planting event"])
     if st.button("Add tree activity", type="primary"):
         st.session_state.trees += int(amount)
-        st.session_state.points += min(int(amount) * 5, 50)
-        st.success(f"Recorded {amount} tree(s) for: {activity}. Points added (maximum 50 per entry).")
+        earned = min(int(amount) * 5, 50, max(0, 100 - int(st.session_state.points)))
+        st.session_state.points = min(100, int(st.session_state.points) + earned)
+        st.success(f"Recorded {amount} tree(s) for: {activity}. Earned {earned} EcoPoints (maximum 50 per entry).")
     st.metric("Trees / tree activities recorded", st.session_state.trees)
     st.caption("This prototype counts recorded activities, not independently verified surviving trees. Tree planting should use suitable native species and appropriate local guidance.")
 

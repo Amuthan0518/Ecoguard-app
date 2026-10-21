@@ -114,7 +114,7 @@ def save_progress():
         response.raise_for_status()
         st.session_state.supabase_status = "Progress saved to Supabase."
     except requests.RequestException as e:
-    st.session_state.supabase_status = (
+        st.session_state.supabase_status = (
         f"Progress could not be saved: {e}"
     )
 

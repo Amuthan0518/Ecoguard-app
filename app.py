@@ -113,8 +113,8 @@ def save_progress():
         )
         response.raise_for_status()
         st.session_state.supabase_status = "Progress saved to Supabase."
-except requests.RequestException as e:
-    details = ""
+    except requests.RequestException as e:
+        details = ""
     if e.response is not None:
         details = f" | Response: {e.response.text[:500]}"
     st.session_state.supabase_status = (

@@ -113,10 +113,10 @@ def save_progress():
         )
         response.raise_for_status()
         st.session_state.supabase_status = "Progress saved to Supabase."
-    except requests.RequestException:
-        st.session_state.supabase_status = (
-            "Progress could not be saved. Check the Supabase secret key and table permissions."
-        )
+   except requests.RequestException as e:
+    st.session_state.supabase_status = (
+        f"Progress could not be saved: {e}"
+    )
 
 # Username-based profiles are convenient, but a username alone is not authentication:
 # another person could enter the same username. Do not store sensitive information here.

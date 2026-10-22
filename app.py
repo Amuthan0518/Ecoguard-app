@@ -314,7 +314,7 @@ elif page == "📣 Pollution Report":
 elif page == "🌦️ Weather & Climate":
     st.subheader("Current weather lookup")
     st.write("Enter a city name to look up current conditions. Weather is not the same as climate: weather is short-term; climate describes long-term patterns.")
-    city = st.text_input("City", value="Chennai")
+    city = st.text_input("City", value="Thiruvarur")
     if st.button("Get current weather", type="primary"):
         try:
             geo = requests.get(
@@ -351,9 +351,46 @@ elif page == "🌦️ Weather & Climate":
                     95: "Thunderstorm", 96: "Thunderstorm with slight hail", 99: "Thunderstorm with heavy hail"
                 }
                 st.success(f"Weather for {place['name']}, {place.get('country', '')}")
-                code = current.get("weather_code")
-                description = weather_codes.get(code, "Condition unavailable")
-                st.markdown(f"### {description}")
+                
+code = current.get("weather_code")
+
+weather_display = {
+    0: ("☀️", "Sunny"),
+    1: ("🌤️", "Mostly Sunny"),
+    2: ("⛅", "Partly Cloudy"),
+    3: ("☁️", "Cloudy"),
+    45: ("🌫️", "Foggy"),
+    48: ("🌫️", "Foggy"),
+    51: ("🌦️", "Light Drizzle"),
+    53: ("🌦️", "Drizzle"),
+    55: ("🌧️", "Heavy Drizzle"),
+    56: ("🌧️", "Freezing Drizzle"),
+    57: ("🌧️", "Heavy Freezing Drizzle"),
+    61: ("🌧️", "Light Rain"),
+    63: ("🌧️", "Rainy"),
+    65: ("🌧️", "Heavy Rain"),
+    66: ("🌧️", "Freezing Rain"),
+    67: ("🌧️", "Heavy Freezing Rain"),
+    71: ("🌨️", "Light Snow"),
+    73: ("🌨️", "Snowy"),
+    75: ("❄️", "Heavy Snow"),
+    77: ("🌨️", "Snow Grains"),
+    80: ("🌦️", "Rain Showers"),
+    81: ("🌧️", "Heavy Rain Showers"),
+    82: ("⛈️", "Violent Rain Showers"),
+    85: ("🌨️", "Snow Showers"),
+    86: ("❄️", "Heavy Snow Showers"),
+    95: ("⛈️", "Thunderstorm"),
+    96: ("⛈️", "Thunderstorm with Hail"),
+    99: ("⛈️", "Severe Thunderstorm with Hail"),
+}
+
+emoji, description = weather_display.get(
+    code, ("🌍", "Weather unavailable")
+)
+
+st.markdown(f"## {emoji} Current Weather: {description}")
+
                 a, b, c = st.columns(3)
                 a.metric("Temperature", f"{current.get('temperature_2m', 'N/A')} °C")
                 b.metric("Feels like", f"{current.get('apparent_temperature', 'N/A')} °C")

@@ -384,12 +384,12 @@ elif page == "🌦️ Weather & Climate":
     96: ("⛈️", "Thunderstorm with Hail"),
     99: ("⛈️", "Severe Thunderstorm with Hail"),
 }
-
-emoji, description = weather_display.get(
+                
+                emoji, description = weather_display.get(
     code, ("🌍", "Weather unavailable")
 )
-
-st.markdown(f"## {emoji} Current Weather: {description}")
+                
+                st.markdown(f"## {emoji} Current Weather: {description}")
 
                 a, b, c = st.columns(3)
                 a.metric("Temperature", f"{current.get('temperature_2m', 'N/A')} °C")

@@ -202,7 +202,7 @@ elif page == "🧠 Climate Quiz":
         submitted = st.form_submit_button("Check answers")
         if submitted:
             score = sum()
-                1 for i, (q, opts, correct, explanation) in enumerate(questions 
+            1 for i, (q, opts, correct, explanation) in enumerate(questions 
                                                                       if answers[i] == opts[correct]
         )
 

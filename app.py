@@ -62,10 +62,10 @@ st.sidebar.caption("Displayed EcoPoints are capped at 200. Points are for learni
 if page == "🏠 Dashboard":
     st.subheader("Your environmental dashboard")
     c1, c2, c3 = st.columns(3)
-    c1.metric("EcoPoints", f"{eco_score}/100")
+    c1.metric("EcoPoints", f"{eco_score}/200")
     c2.metric("Challenges done", len(st.session_state.completed_challenges))
     c3.metric("Trees recorded", st.session_state.trees)
-    st.progress(eco_score / 100, text=f"EcoPoints: {eco_score} / 100")
+    st.progress(eco_score / 200, text=f"EcoPoints: {eco_score} / 200")
     st.info("Start with one small action. Repeating good habits can help reduce environmental impact.")
     st.subheader("Explore EcoGuard")
     st.markdown("""

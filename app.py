@@ -10,7 +10,10 @@ st.set_page_config(page_title="EcoGuard", page_icon="🌍", layout="wide")
 # ---------------------------
 st.markdown("""
 <style>
-.stApp { background: linear-gradient(180deg, #f4fbf3 0%, #ffffff 55%); }
+.stApp {
+    background: #17191F;
+    color: #F5F7FA;
+}
 h1, h2, h3 { color: #17633b; }
 div[data-testid="stMetric"] { background: #eef8ed; padding: 14px; border-radius: 12px; }
 </style>

@@ -201,11 +201,10 @@ elif page == "🧠 Climate Quiz":
         answers[i] = st.radio(f"{i+1}. {q}", opts, key=f"quiz_{st.session_state.quiz_round}_{i}")
         submitted = st.form_submit_button("Check answers")
         if submitted:
-            score = sum()
-            1 for i, (q, opts, correct, explanation) in enumerate(questions 
-                                                                      if answers[i] == opts[correct]
-        )
-
+        score = 0
+        for i, (q, opts, correct, explanation) in enumerate(questions):
+            if answers[i] == opts[correct]:
+                score += 1
         st.session_state.quiz_answers = answers
         st.session_state.quiz_score = score
         st.session_state.quiz_submitted = True

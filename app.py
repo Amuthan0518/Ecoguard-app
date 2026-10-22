@@ -353,8 +353,8 @@ elif page == "🌦️ Weather & Climate":
                 st.success(f"Weather for {place['name']}, {place.get('country', '')}")
                 
                 code = current.get("weather_code")
-
-weather_display = {
+                
+                weather_display = {
     0: ("☀️", "Sunny"),
     1: ("🌤️", "Mostly Sunny"),
     2: ("⛅", "Partly Cloudy"),

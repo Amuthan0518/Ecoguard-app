@@ -45,6 +45,8 @@ challenges = {
     "Save water": ("Turn off the tap while brushing your teeth.", 10),
 }
 
+st.sidebar.image("ecoguard_logo_png.png", width=100)
+st.sidebar.markdown("---")
 pages = [
     "🏠 Dashboard", "🌱 Eco Challenges", "🌡️ Carbon Calculator",
     "🧠 Climate Quiz", "🌳 Tree Tracker", "💬 Eco Chatbot",

@@ -16,6 +16,7 @@ div[data-testid="stMetric"] { background: #eef8ed; padding: 14px; border-radius:
 </style>
 """, unsafe_allow_html=True)
 
+st.image("ecoguard_logo_png.png", width=160)
 st.title("🌍 EcoGuard")
 st.caption("Small actions. A greener future.")
 st.write("Learn about climate change, take eco-friendly actions, and track your progress.")

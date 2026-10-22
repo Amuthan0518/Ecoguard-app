@@ -52,7 +52,9 @@ pages = [
     "🧠 Climate Quiz", "🌳 Tree Tracker", "💬 Eco Chatbot",
     "📣 Pollution Report", "🌦️ Weather & Climate", "🌫️ Air Quality index(AQI)"
 ]
-page = st.sidebar.radio("Navigate", pages)
+st.sidebar.markdown("### 🌿 Explore EcoGuard")
+st.sidebar.caption("Discover tools for a greener future!")
+page = st.sidebar.radio("Choose a feature", pages)
 eco_score = min(max(int(st.session_state.points), 0), 200)
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🌍 The Minds Behind EcoGuard")

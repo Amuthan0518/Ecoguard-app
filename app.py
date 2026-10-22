@@ -196,7 +196,7 @@ elif page == "🧠 Climate Quiz":
 
     questions = st.session_state.quiz_questions
     st.caption(f"This round draws up to 10 questions from a pool of {len(question_pool)}. Quiz points can be earned once per question.")
-        answers = {}
+    answers = {}
         for i, (q, opts, correct, explanation) in enumerate(questions):
             answers[i] = st.radio(f"{i+1}. {q}", opts, key=f"quiz_{st.session_state.quiz_round}_{i}")
         submitted = st.form_submit_button("Check answers")

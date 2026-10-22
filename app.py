@@ -51,6 +51,10 @@ pages = [
 ]
 page = st.sidebar.radio("Navigate", pages)
 eco_score = min(max(int(st.session_state.points), 0), 200)
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🌍 The Minds Behind EcoGuard")
+st.sidebar.markdown("Bagath Amuthan.V & P.S. Kavin Barathi")
+st.sidebar.markdown("---")
 st.sidebar.metric("Your EcoPoints", f"{eco_score}/200")
 st.sidebar.caption("Displayed EcoPoints are capped at 200. Points are for learning, not a verified environmental measurement.")
 

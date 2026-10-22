@@ -50,8 +50,8 @@ pages = [
     "📣 Pollution Report", "🌦️ Weather & Climate", "🌫️ Air Quality index(AQI)"
 ]
 page = st.sidebar.radio("Navigate", pages)
-eco_score = min(max(int(st.session_state.points), 0), 100)
-st.sidebar.metric("Your EcoPoints", f"{eco_score}/100")
+eco_score = min(max(int(st.session_state.points), 0), 200)
+st.sidebar.metric("Your EcoPoints", f"{eco_score}/200")
 st.sidebar.caption("Displayed EcoPoints are capped at 100. Points are for learning, not a verified environmental measurement.")
 
 if page == "🏠 Dashboard":
@@ -87,8 +87,8 @@ elif page == "🌱 Eco Challenges":
                 st.success("Completed")
             elif st.button("Complete", key="challenge_" + name):
                 st.session_state.completed_challenges.add(name)
-                earned = min(points, max(0, 100 - int(st.session_state.points)))
-                st.session_state.points = min(100, int(st.session_state.points) + earned)
+                earned = 10
+                st.session_state.points = min(200, int(st.session_state.points) + earned)
                 if earned > 0:
                     st.success(f"Completed! You earned {earned} EcoPoints.")
                 else:
@@ -166,42 +166,76 @@ elif page == "🧠 Climate Quiz":
         ("Which source is a direct observation of climate?", ["Many years of temperature records", "One unusually cold morning", "A single cloudy afternoon", "One windy day"], 0,
          "Long-term records help scientists identify climate patterns beyond day-to-day variation.")
     ]
-    if "quiz_questions" not in st.session_state:
-        st.session_state.quiz_questions = random.sample(question_pool, 10)
+    if "used_quiz_questions" not in st.session_state:
+        st.session_state.used_quiz_questions = set()
+
+    if "quiz_questions" not in st.session_state or st.session_state.quiz_questions is None:
+        remaining = [
+            q for q in question_pool
+            if q[0] not in st.session_state.used_quiz_questions
+        ]
+
+        if not remaining:
+            st.session_state.used_quiz_questions = set()
+            remaining = question_pool.copy()
+
+        count = min(10, len(remaining))
+        st.session_state.quiz_questions = random.sample(remaining, count)
+
+        for q in st.session_state.quiz_questions:
+            st.session_state.used_quiz_questions.add(q[0])
+
         st.session_state.quiz_answers = {}
         st.session_state.quiz_submitted = False
     if st.button("🔄 Reset quiz and shuffle questions", key="reset_quiz"):
         st.session_state.quiz_round += 1
-        st.session_state.quiz_questions = random.sample(question_pool, 10)
+        st.session_state.quiz_questions = None
         st.session_state.quiz_answers = {}
         st.session_state.quiz_submitted = False
         st.rerun()
+
     questions = st.session_state.quiz_questions
-    st.caption(f"This round draws 10 questions at random from a pool of {len(question_pool)}. Quiz points can be earned once per app session.")
-    with st.form("climate_quiz"):
+    st.caption(f"This round draws up to 10 questions from a pool of {len(question_pool)}. Quiz points can be earned once per question.")
         answers = {}
         for i, (q, opts, correct, explanation) in enumerate(questions):
             answers[i] = st.radio(f"{i+1}. {q}", opts, key=f"quiz_{st.session_state.quiz_round}_{i}")
         submitted = st.form_submit_button("Check answers")
     if submitted:
-        score = sum(1 for i, (q, opts, correct, explanation) in enumerate(questions) if answers[i] == opts[correct])
+        score = sum(
+            1 for i, (q, opts, correct, explanation) in enumerate(questions)
+            if answers[i] == opts[correct]
+        )
+
         st.session_state.quiz_answers = answers
         st.session_state.quiz_score = score
         st.session_state.quiz_submitted = True
-        if not st.session_state.quiz_awarded:
-            earned = min(score * 5, max(0, 100 - int(st.session_state.points)))
-            st.session_state.points = min(100, int(st.session_state.points) + earned)
-            st.session_state.quiz_awarded = True
-            st.success(f"You scored {score}/{len(questions)} and earned {earned} EcoPoints!")
-        else:
-            st.info(f"You scored {score}/{len(questions)}. Quiz points have already been awarded in this session.")
-    if st.session_state.get("quiz_submitted"):
+
+        if "quiz_correct_awarded" not in st.session_state:
+            st.session_state.quiz_correct_awarded = set()
+
+        earned = 0
+
+        for i, (q, opts, correct, explanation) in enumerate(questions):
+            if (
+                answers[i] == opts[correct]
+                and q[0] not in st.session_state.quiz_correct_awarded
+            ):
+                st.session_state.quiz_correct_awarded.add(q[0])
+                st.session_state.points = min(
+                    200, int(st.session_state.points) + 5
+                )
+                earned += 5
+
+        st.success(f"You scored {score}/{len(questions)}!")
+        st.info(f"You earned {earned} EcoPoints this round.")
+
+    if st.session_state.get("quiz_submitted", False):
         for i, (q, opts, correct, explanation) in enumerate(questions):
             picked = st.session_state.quiz_answers.get(i)
-            st.markdown(f"**Q{i+1}:** {'✅' if picked == opts[correct] else '❌'} {explanation}")
-    if st.session_state.quiz_awarded:
-        st.caption("To avoid repeatedly collecting points, this prototype awards quiz points once per session.")
-
+            st.markdown(
+                f"**Q{i+1}:** "
+                f"{'✅' if picked == opts[correct] else '❌'} {explanation}"
+            )
 elif page == "🌳 Tree Tracker":
     st.subheader("Tree planting and care tracker")
     st.write("Record trees you have planted or helped care for. Only count real activities.")
@@ -209,9 +243,7 @@ elif page == "🌳 Tree Tracker":
     activity = st.selectbox("Activity", ["Planted a tree", "Helped care for existing trees", "Joined a tree-planting event"])
     if st.button("Add tree activity", type="primary"):
         st.session_state.trees += int(amount)
-        earned = min(int(amount) * 5, 50, max(0, 100 - int(st.session_state.points)))
-        st.session_state.points = min(100, int(st.session_state.points) + earned)
-        st.success(f"Recorded {amount} tree(s) for: {activity}. Earned {earned} EcoPoints (maximum 50 per entry).")
+        st.success(f"Recorded {amount} tree(s) for: {activity}. No EcoPoints awarded.")  
     st.metric("Trees / tree activities recorded", st.session_state.trees)
     st.caption("This prototype counts recorded activities, not independently verified surviving trees. Tree planting should use suitable native species and appropriate local guidance.")
 

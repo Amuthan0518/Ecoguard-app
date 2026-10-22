@@ -371,7 +371,22 @@ elif page == "🌦️ Weather & Climate":
     - A single hot day does not prove climate change; scientists examine long-term observations and many kinds of evidence.
     """)
     st.caption("Weather service: Open-Meteo (internet connection required).")
+    st.subheader("🌍 Climate Information")
+    st.write("Climate describes long-term weather patterns in a region.")
 
+    st.markdown("""
+    **What you can learn:**
+    - 🌡️ Temperature shows how hot or cold the air is.
+    - 💧 Humidity tells you how much moisture is in the air.
+    - 🌧️ Rainfall helps us understand wet and dry conditions.
+    - 💨 Wind speed tells us how fast the air is moving.
+    - 🌱 Climate records over many years help scientists study climate change.
+    """)
+
+    st.info(
+        "Tip: Use the current weather readings above to understand today's "
+        "conditions. Today's weather alone cannot tell us the climate of a region."
+    )
 elif page == "🌫️ Air Quality index(AQI)":
     st.subheader("Current air quality")
     st.write("Look up the latest available air-quality model data for a city. Readings and pollutant coverage vary by location and provider availability.")

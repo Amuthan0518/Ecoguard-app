@@ -308,7 +308,7 @@ elif page == "💬 Eco Chatbot":
                             history.append({"role": role, "parts": [{"text": item["content"]}]})
                         # Use Gemini's REST API so no extra Python package is needed.
                         response = requests.post(
-                            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+                            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
                             headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
                             json={
                                 "systemInstruction": {"parts": [{"text": "You are EcoGuide, a friendly environmental education assistant for students. Give clear, accurate, age-appropriate answers about the environment. Use simple language, practical safe actions, and concise explanations. Do not ask for personal information. If unsure, say so."}]},
